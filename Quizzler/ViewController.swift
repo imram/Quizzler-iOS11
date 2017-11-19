@@ -10,8 +10,10 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    //Place your instance variables here
-    
+    let questionBank = QuestionBank()
+    var pickedAnswer : Bool = false
+    var displayedQuestionIndex = 0
+    var score: Int = 0
     
     @IBOutlet weak var questionLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
@@ -20,34 +22,69 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        nextQuestion()
+    }
+    
+    func nextQuestion() {
         
+        if displayedQuestionIndex <= 12 {
+            questionLabel.text = questionBank.list[displayedQuestionIndex].questionText
+            updateUI()
+        } else if displayedQuestionIndex == questionBank.list.count {
+            showFinishAlert()
+        }
     }
 
 
     @IBAction func answerPressed(_ sender: AnyObject) {
+        
+        if sender.tag == 1 {
+            pickedAnswer = true
+        }
+        else {
+            pickedAnswer = false
+        }
+        
+        checkAnswer()
+        displayedQuestionIndex += 1
+        nextQuestion()
   
     }
     
+    func checkAnswer() {
+        let correctAnswer = questionBank.list[displayedQuestionIndex].answer
+        
+        if pickedAnswer == correctAnswer {
+            ProgressHUD.showSuccess("Correct")
+            score += 1
+        }
+        else {
+            ProgressHUD.showError("Wrong!")
+        }
+    }
     
     func updateUI() {
+        scoreLabel.text = "Score: \(score)"
+        progressLabel.text = "\(displayedQuestionIndex + 1)/13"
+        progressBar.frame.size.width = (self.view.frame.size.width / 13) * CGFloat((displayedQuestionIndex + 1))
       
     }
     
-
-    func nextQuestion() {
+    func showFinishAlert() {
+        let alertController = UIAlertController(title: "Awesome", message: "You have finished quize, do you want to start over", preferredStyle: .alert)
+        let restartAction = UIAlertAction(title: "Restart", style: .default, handler: { (UIAlerAction) in
+            self.startOver()
+        })
         
+        alertController.addAction(restartAction)
+        present(alertController, animated: true, completion: nil)
     }
-    
-    
-    func checkAnswer() {
-        
-    }
-    
     
     func startOver() {
+       displayedQuestionIndex = 0
+       score = 0
+       nextQuestion()
        
     }
-    
 
-    
 }
